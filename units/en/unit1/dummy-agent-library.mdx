@@ -28,10 +28,15 @@ In the Hugging Face ecosystem, there is a convenient feature called Serverless A
 import os
 from huggingface_hub import InferenceClient
 
-## You need a token from https://hf.co/settings/tokens, ensure that you select 'read' as the token type. If you run this on Google Colab, you can set it up in the "settings" tab under "secrets". Make sure to call it "HF_TOKEN"
-# HF_TOKEN = os.environ.get("HF_TOKEN")
+## You need a token from https://hf.co/settings/tokens, ensure that you select 'read' as the token type.
+## If you run this on Google Colab, add it in the "Secrets" tab (key icon on the left sidebar) and call it "HF_TOKEN".
+try:
+    from google.colab import userdata
+    HF_TOKEN = userdata.get("HF_TOKEN")
+except ImportError:
+    HF_TOKEN = os.environ.get("HF_TOKEN")
 
-client = InferenceClient(model="meta-llama/Llama-4-Scout-17B-16E-Instruct")
+client = InferenceClient(model="moonshotai/Kimi-K2.5", token=HF_TOKEN)
 ```
 
 We use the `chat` method since it is a convenient and reliable way to apply chat templates:
@@ -43,6 +48,7 @@ output = client.chat.completions.create(
     ],
     stream=False,
     max_tokens=1024,
+    extra_body={'thinking': {'type': 'disabled'}},
 )
 print(output.choices[0].message.content)
 ```
@@ -164,6 +170,7 @@ output = client.chat.completions.create(
     messages=messages,
     stream=False,
     max_tokens=200,
+    extra_body={'thinking': {'type': 'disabled'}},
 )
 print(output.choices[0].message.content)
 ```
@@ -195,7 +202,8 @@ Do you see the issue?
 output = client.chat.completions.create(
     messages=messages,
     max_tokens=150,
-    stop=["Observation:"] # Let's stop before any actual function is called
+    stop=["Observation:"], # Let's stop before any actual function is called
+    extra_body={'thinking': {'type': 'disabled'}},
 )
 
 print(output.choices[0].message.content)
@@ -246,6 +254,7 @@ output = client.chat.completions.create(
     messages=messages,
     stream=False,
     max_tokens=200,
+    extra_body={'thinking': {'type': 'disabled'}},
 )
 
 print(output.choices[0].message.content)
